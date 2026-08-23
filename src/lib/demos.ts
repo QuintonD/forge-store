@@ -1,7 +1,7 @@
 import type { DemoId } from './types'
 
 async function loadDemo(id: DemoId): Promise<string> {
-  const res = await fetch(`/demos/${id}.html`)
+  const res = await fetch(`${import.meta.env.BASE_URL}demos/${id}.html`)
   if (!res.ok) throw new Error(`demo artifact ${id} unavailable`)
   return res.text()
 }

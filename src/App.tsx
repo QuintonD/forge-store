@@ -31,7 +31,7 @@ function ScrollToTop() {
 export default function App() {
   return (
     <StoreProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <SyncProvider>
           <ScrollToTop />
           <div className="flex min-h-screen flex-col">

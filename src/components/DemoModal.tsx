@@ -106,7 +106,7 @@ export function DemoModal() {
           )}
           <iframe
             title={`${app.name} demo`}
-            src={`/demos/${app.demoId}.html`}
+            src={`${import.meta.env.BASE_URL}demos/${app.demoId}.html`}
             onLoad={() => setFrameLoaded(true)}
             className="relative h-full w-full bg-white"
             sandbox="allow-scripts"
