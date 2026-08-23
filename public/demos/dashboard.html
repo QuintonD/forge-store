@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; overflow:hidden; background:#060b16; color:#e6edf7;
+    font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif; }
+  .wrap { height:100%; display:flex; flex-direction:column; gap:12px; padding:16px 18px;
+    max-width:1080px; margin:0 auto; position:relative; }
+  header { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .logo { width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,#06b6d4,#3b82f6);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px;
+    box-shadow:0 4px 20px rgba(34,211,238,.35); }
+  h1 { font-size:15px; letter-spacing:.01em; } 
+  .sub { font-size:11px; color:#5d6b84; margin-top:1px; }
+  .live { display:flex; align-items:center; gap:6px; font-size:10px; letter-spacing:.22em; color:#67e8f9;
+    border:1px solid rgba(103,232,249,.3); padding:4px 10px; border-radius:999px; }
+  .dot { width:6px; height:6px; border-radius:50%; background:#22d3ee; box-shadow:0 0 10px #22d3ee; animation:pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity:.25; } }
+  .ranges { margin-left:auto; display:flex; gap:5px; background:#0a1322; padding:3px; border-radius:9px; border:1px solid #16233c; }
+  .ranges button { border:none; background:transparent; color:#7787a3; font-size:11px; font-weight:600;
+    padding:5px 11px; border-radius:7px; cursor:pointer; letter-spacing:.04em; }
+  .ranges button.on { background:linear-gradient(135deg,#0891b2,#2563eb); color:#fff; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  @media (max-width:720px){ .kpis { grid-template-columns:repeat(2,1fr);} .main{flex-direction:column;} .aside{min-width:unset;} }
+  .kpi { background:#0a1220; border:1px solid #16233c; border-radius:13px; padding:12px 14px 10px;
+    position:relative; overflow:hidden; transition:border-color .3s; }
+  .kpi:hover { border-color:#2b3d61; }
+  .kpi label { font-size:9.5px; letter-spacing:.2em; color:#5d6b84; font-weight:700; }
+  .kpi .val { font-size:22px; font-weight:800; margin-top:3px; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+  .delta { font-size:10.5px; font-weight:800; padding:1px 7px; border-radius:999px; display:inline-block; margin-top:4px; }
+  .up { color:#4ade80; background:rgba(74,222,128,.1); } .dn { color:#f87171; background:rgba(248,113,113,.1); }
+  svg.spark { position:absolute; right:10px; bottom:10px; opacity:.9; }
+  .grid2 { flex:1; display:flex; gap:10px; min-height:0; }
+  .panel { background:#0a1220; border:1px solid #16233c; border-radius:13px; padding:13px 15px; display:flex; flex-direction:column; min-height:0; }
+  .ptitle { font-size:10px; letter-spacing:.18em; color:#7dd3fc; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
+  .ptitle span:last-child { color:#44526b; letter-spacing:.06em; }
+  .chartpanel { flex:1.9; min-width:0; }
+  #area { flex:1; width:100%; margin-top:8px; }
+  .aside { flex:1; min-width:270px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .bars { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .brow { display:grid; grid-template-columns:64px 1fr 34px; gap:8px; align-items:center; font-size:11px; color:#94a3b8; }
+  .brow b { text-align:right; color:#cbd5e1; font-variant-numeric:tabular-nums; }
+  .track { height:7px; background:#101b30; border-radius:99px; overflow:hidden; }
+  .fill { height:100%; border-radius:99px; background:linear-gradient(90deg,#0891b2,#3b82f6); transition:width .9s cubic-bezier(.2,.8,.3,1); }
+  .feed { list-style:none; overflow-y:auto; flex:1; margin-top:8px; scrollbar-width:none; }
+  .feed::-webkit-scrollbar{display:none}
+  .fevent { display:flex; gap:8px; align-items:baseline; padding:5px 0; border-bottom:1px dashed #14203a; font-size:11px; animation:in .4s ease-out both; }
+  @keyframes in { from { opacity:0; transform:translateY(-5px);} }
+  .ftime { color:#44526b; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .fdot { width:6px; height:6px; border-radius:50%; flex-shrink:0; position:relative; top:-1px; }
+  .toast { position:absolute; top:14px; right:18px; z-index:20; background:#0c1526; border:1px solid rgba(251,191,36,.4);
+    border-left:3px solid #fbbf24; border-radius:11px; padding:10px 14px; max-width:280px; font-size:11.5px;
+    box-shadow:0 18px 50px -12px rgba(0,0,0,.7); transform:translateX(calc(100% + 40px)); transition:transform .45s cubic-bezier(.2,.8,.3,1); }
+  .toast.show { transform:none; }
+  .toast b { display:block; color:#fde68a; font-size:10px; letter-spacing:.16em; margin-bottom:3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">P</div>
+    <div><h1>Pulse Analytics</h1><div class="sub">acme-prod &middot; us-east &middot; all systems nominal</div></div>
+    <span class="live"><span class="dot"></span>LIVE</span>
+    <div class="ranges"><button class="on">24H</button><button>7D</button><button>30D</button><button>QTD</button></div>
+  </header>
+  <div class="kpis">
+    <div class="kpi"><label>MRR</label><div class="val" id="v0">$128.4K</div><span class="delta up" id="d0">&Delta; +0.8%</span><svg class="spark" id="s0" width="72" height="28"></svg></div>
+    <div class="kpi"><label>ACTIVE USERS</label><div class="val" id="v1">48,211</div><span class="delta up" id="d1">&Delta; +1.2%</span><svg class="spark" id="s1" width="72" height="28"></svg></div>
+    <div class="kpi"><label>CONVERSION</label><div class="val" id="v2">4.21%</div><span class="delta dn" id="d2">&Delta; -0.1%</span><svg class="spark" id="s2" width="72" height="28"></svg></div>
+    <div class="kpi"><label>P95 LATENCY</label><div class="val" id="v3">212ms</div><span class="delta up" id="d3">&Delta; -18ms</span><svg class="spark" id="s3" width="72" height="28"></svg></div>
+  </div>
+  <div class="grid2">
+    <div class="panel chartpanel">
+      <div class="ptitle"><span>MRR TREND</span><span>auto-refresh 2s</span></div>
+      <svg id="area" viewBox="0 0 600 220" preserveAspectRatio="none">
+        <defs><linearGradient id="gfill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#38bdf8" stop-opacity=".32"/>
+          <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+        </linearGradient></defs>
+        <path id="afill" fill="url(#gfill)"></path>
+        <path id="aline" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px rgba(56,189,248,.45))"></path>
+        <line id="cursor" y1="0" y2="220" stroke="rgba(56,189,248,.35)" stroke-dasharray="3 4"></line>
+        <circle id="headDot" r="3.5" fill="#e0f2fe" stroke="#38bdf8" stroke-width="2"></circle>
+      </svg>
+    </div>
+    <div class="aside">
+      <div class="panel">
+        <div class="ptitle"><span>SIGNUPS BY CHANNEL</span><span>24h</span></div>
+        <div class="bars" id="bars"></div>
+      </div>
+      <div class="panel" style="flex:1">
+        <div class="ptitle"><span>EVENT STREAM</span></div>
+        <ul class="feed" id="feed"></ul>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"><b>ANOMALY DETECTED</b><span id="tmsg">Signup spike +38% in paid_search cohort</span></div>
+</div>
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  var N=42;
+  function walk(n,start,vol,min,max){
+    var a=[],v=start;
+    for(var i=0;i<n;i++){ v+= (Math.random()-.48)*vol; v=Math.max(min,Math.min(max,v)); a.push(v); }
+    return a;
+  }
+  var mrrA=walk(N,128400,2600,110000,150000), usrA=walk(N,48211,420,42000,56000),
+      cnvA=walk(N,4.21,.09,3.4,5.2), latA=walk(N,212,9,140,300);
+  var cur={mrr:mrrA[N-1],usr:usrA[N-1],cnv:cnvA[N-1],lat:latA[N-1]};
+  var prev={mrr:cur.mrr,usr:cur.usr,cnv:cur.cnv,lat:cur.lat};
+  var sparks=[[],[],[],[]];
+
+  function fmtMrr(v){ return '$'+(v/1000).toFixed(1)+'K'; }
+  function fmtUsr(v){ return Math.round(v).toLocaleString('en-US'); }
+  function fmtCnv(v){ return v.toFixed(2)+'%'; }
+  function fmtLat(v){ return Math.round(v)+'ms'; }
+
+  function deltaBadge(el,now,before,unit,invert){
+    var diff=now-before, up=diff>=0;
+    if(invert) up=!up;
+    el.className='delta '+(up?'up':'dn');
+    var arrow=up?'&uarr;':'&darr;';
+    el.innerHTML=arrow+' '+Math.abs(diff).toFixed(unit==='pct'?2:0)+(unit==='pct'?'%':unit==='ms'?'ms':'');
+  }
+
+  function buildPath(data,w,h,pad){
+    var mn=Math.min.apply(null,data), mx=Math.max.apply(null,data), rng=(mx-mn)||1;
+    var sx=w/(data.length-1), d='';
+    for(var i=0;i<data.length;i++){
+      var x=(i*sx).toFixed(1);
+      var y=(pad+(1-(data[i]-mn)/rng)*(h-pad*2)).toFixed(1);
+      d+=(i?'L':'M')+x+','+y;
+    }
+    return {d:d,last:[(w-sx).toFixed(1),(pad+(1-(data[data.length-1]-mn)/rng)*(h-pad*2)).toFixed(1)]};
+  }
+  function drawSpark(svg,data,color){
+    svg.innerHTML='';
+    var p=buildPath(data,72,28,4);
+    var ln=document.createElementNS('http://www.w3.org/2000/svg','path');
+    ln.setAttribute('d',p.d); ln.setAttribute('fill','none');
+    ln.setAttribute('stroke',color); ln.setAttribute('stroke-width','1.8');
+    svg.appendChild(ln);
+  }
+
+  function tickData(){
+    prev.mrr=cur.mrr; prev.usr=cur.usr; prev.cnv=cur.cnv; prev.lat=cur.lat;
+    cur.mrr=Math.max(110000,Math.min(150000,cur.mrr+(Math.random()-.46)*2400));
+    cur.usr=Math.max(42000,Math.min(56000,cur.usr+(Math.random()-.47)*380));
+    cur.cnv=Math.max(3.4,Math.min(5.2,cur.cnv+(Math.random()-.5)*.07));
+    cur.lat=Math.max(140,Math.min(300,cur.lat+(Math.random()-.52)*10));
+    mrrA.push(cur.mrr); usrA.push(cur.usr); cnvA.push(cur.cnv); latA.push(cur.lat);
+    [mrrA,usrA,cnvA,latA].forEach(function(a){ a.shift(); });
+    $('v0').textContent=fmtMrr(cur.mrr); deltaBadge($('d0'),cur.mrr,prev.mrr,'$',false);
+    $('v1').textContent=fmtUsr(cur.usr); deltaBadge($('d1'),cur.usr,prev.usr,'',false);
+    $('v2').textContent=fmtCnv(cur.cnv); deltaBadge($('d2'),cur.cnv,prev.cnv,'pct',false);
+    $('v3').textContent=fmtLat(cur.lat); deltaBadge($('d3'),cur.lat,prev.lat,'ms',true);
+    for(var s=0;s<4;s++){
+      var src=[mrrA,usrA,cnvA,latA][s].slice(-18);
+      sparks[s]=src; drawSpark($('s'+s),src,['#4ade80','#60a5fa','#fbbf24','#f87171'][s]);
+    }
+  }
+
+  var animT=0;
+  function frame(now){
+    if(now-animT>2000){ animT=now; tickData(); }
+    var p=buildPath(mrrA,600,220,14);
+    $('aline').setAttribute('d',p.d);
+    $('afill').setAttribute('d',p.d+'L600,220L0,220Z');
+    $('cursor').setAttribute('x1',p.last[0]); $('cursor').setAttribute('x2',p.last[0]);
+    $('headDot').setAttribute('cx',p.last[0]); $('headDot').setAttribute('cy',p.last[1]);
+    requestAnimationFrame(frame);
+  }
+
+  var channels=[['organic',34],['paid',27],['referral',17],['social',13],['email',9]];
+  function renderBars(){
+    var host=$('bars'); host.innerHTML='';
+    channels.forEach(function(c){
+      var row=document.createElement('div'); row.className='brow';
+      var nm=document.createElement('span'); nm.textContent=c[0];
+      var tr=document.createElement('div'); tr.className='track';
+      var fl=document.createElement('div'); fl.className='fill'; fl.style.width=c[1]+'%';
+      tr.appendChild(fl);
+      var vv=document.createElement('b'); vv.textContent=Math.round(c[1])+'%';
+      row.appendChild(nm); row.appendChild(tr); row.appendChild(vv);
+      host.appendChild(row);
+    });
+  }
+  setInterval(function(){
+    channels.forEach(function(c){ c[1]=Math.max(3,Math.min(48,c[1]+(Math.random()-.5)*3)); });
+    renderBars();
+  },3400);
+
+  var events=[
+    ['deploy api-gateway v2.14.3 succeeded','#4ade80'],
+    ['autoscaler added 2 nodes to queue-consumers','#60a5fa'],
+    ['checkout p99 back under SLO','#4ade80'],
+    ['cohort D7 retention +0.4pts week-over-week','#60a5fa'],
+    ['alert cleared: error-budget burn normal','#4ade80'],
+    ['feature flag new-onboarding ramped to 50%','#fbbf24'],
+    ['nightly backup snapshot completed','#94a3b8'],
+    ['cache hit ratio dipped to 91.2%','#fbbf24'],
+    ['stripe webhook replay finished (3 events)','#94a3b8'],
+    ['canary analysis: no regression detected','#4ade80']
+  ];
+  function pushEvent(){
+    var li=document.createElement('li'); li.className='fevent';
+    var e=events[(Math.random()*events.length)|0];
+    var now=new Date();
+    var hh=String(now.getHours()).padStart(2,'0'),
+        mm=String(now.getMinutes()).padStart(2,'0'),
+        ss=String(now.getSeconds()).padStart(2,'0');
+    li.innerHTML='<span class="ftime">'+hh+':'+mm+':'+ss+'</span>'+
+      '<span class="fdot" style="background:'+e[1]+';box-shadow:0 0 8px '+e[1]+'"></span>'+
+      '<span>'+e[0]+'</span>';
+    var feed=$('feed');
+    feed.insertBefore(li,feed.firstChild);
+    while(feed.children.length>9) feed.removeChild(feed.lastChild);
+  }
+
+  var anomalies=['Signup spike +38% in paid_search cohort','Checkout latency drift +22ms vs baseline',
+    'Churn-risk segment grew by 118 accounts','Refund rate ticked above weekly p95'];
+  setInterval(function(){
+    if(Math.random()<.4){
+      $('tmsg').textContent=anomalies[(Math.random()*anomalies.length)|0];
+      $('toast').classList.add('show');
+      setTimeout(function(){ $('toast').classList.remove('show'); },3600);
+    }
+  },9000);
+
+  document.querySelectorAll('.ranges button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.ranges button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+    });
+  });
+
+  renderBars();
+  for(var e=0;e<6;e++) pushEvent();
+  tickData();
+  setInterval(pushEvent,2600);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

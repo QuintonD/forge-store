@@ -1,0 +1,48 @@
+name: agent-seo-nightly
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: agent-seo-nightly
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check sitemap drift (catalog vs committed)
+        id: check
+        run: node scripts/agents/seo-audit.mjs --check
+
+      - name: Regenerate + open drift PR
+        if: failure()
+        run: |
+          node scripts/agents/seo-audit.mjs
+          git config user.name "forge-seo-agent"
+          git config user.email "agents@forge.example"
+          git checkout -b agent/seo-drift
+          git add public/sitemap.xml content/queue/
+          git commit -m "agent(seo): regenerate sitemap after catalog drift"
+          git push origin agent/seo-drift
+          gh pr create \
+            --title "agent(seo): sitemap drift" \
+            --body "Nightly SEO audit found catalog/sitemap drift. Regenerated artifact attached. Merge to publish." \
+            --label "agent,seo"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

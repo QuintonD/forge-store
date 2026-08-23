@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; overflow:hidden; background:#0a0714;
+    font-family: ui-monospace, Menlo, Consolas, monospace; color:#f5d0fe;
+    display:flex; align-items:center; justify-content:center;
+    user-select:none; -webkit-user-select:none; touch-action:none; }
+  #stage { position:relative; width:min(96vmin, 640px); aspect-ratio:4/3; }
+  canvas { width:100%; height:100%; display:block; border-radius:12px;
+    border:1px solid rgba(217,70,239,.35); box-shadow:0 0 44px rgba(217,70,239,.18), inset 0 0 60px rgba(34,211,238,.05); }
+  .hud { position:absolute; top:-38px; left:2px; right:2px; display:flex; justify-content:space-between;
+    font-size:14px; letter-spacing:.14em; color:#67e8f9; text-shadow:0 0 12px rgba(103,232,249,.6); }
+  .hud b { color:#f0abfc; }
+  .overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; background:rgba(10,7,20,.82); backdrop-filter:blur(4px); border-radius:12px; text-align:center; cursor:pointer; }
+  .title { font-size:clamp(26px,6vw,42px); font-weight:800; letter-spacing:.22em; color:#f0abfc;
+    text-shadow:0 0 22px rgba(217,70,239,.85), 0 0 60px rgba(217,70,239,.4); }
+  .sub { font-size:13px; letter-spacing:.28em; color:#67e8f9; animation:blink 1.4s step-end infinite; }
+  @keyframes blink { 50% { opacity:.25; } }
+  .keys { font-size:11px; color:#8b93a7; letter-spacing:.12em; line-height:1.9; }
+  kbd { background:#1c1027; border:1px solid #4a1d5e; border-radius:4px; padding:1px 7px; color:#f0abfc; font-size:11px; }
+  .combo { position:absolute; pointer-events:none; font-weight:800; color:#fef08a;
+    text-shadow:0 0 14px rgba(254,240,138,.9); animation:rise .9s ease-out forwards; z-index:5; }
+  @keyframes rise { from { opacity:1; transform:translateY(0) scale(.9);} to { opacity:0; transform:translateY(-46px) scale(1.25);} }
+  .fhint { position:absolute; bottom:-34px; left:0; right:0; text-align:center; font-size:11px;
+    letter-spacing:.18em; color:#8b93a7; transition:opacity .5s; z-index:6; }
+  .fhint.gone { opacity:0; }
+  @keyframes rise { from { opacity:1; transform:translateY(0) scale(.9);} to { opacity:0; transform:translateY(-46px) scale(1.25);} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="hud"><span>SCORE <b id="score">0</b></span><span>BEST <b id="best">0</b></span><span id="speed">x1.0</span></div>
+  <canvas id="cv" width="640" height="480"></canvas>
+  <div class="overlay" id="ov">
+    <div class="title">NEON SERPENT</div>
+    <div class="sub" id="ovsub">PRESS ANY ARROW TO BEGIN</div>
+    <div class="keys">
+      <kbd>&larr;</kbd><kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&rarr;</kbd> or <kbd>WASD</kbd> steer &nbsp;&middot;&nbsp; <kbd>SPACE</kbd> pause<br>
+      obstacles sync to the beat &middot; thread gaps at speed for combos
+    </div>
+  </div>
+  <div class="fhint" id="fhint">CLICK THE ARENA ONCE, THEN STEER WITH ARROWS / WASD â€” OR SWIPE ON TOUCH</div>
+</div>
+<script>
+(function(){
+  var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  var COLS = 32, ROWS = 24, CW = cv.width/COLS, CH = cv.height/ROWS;
+  var scoreEl = document.getElementById('score'), bestEl = document.getElementById('best'),
+      speedEl = document.getElementById('speed'), ov = document.getElementById('ov'),
+      ovsub = document.getElementById('ovsub');
+  var snake, dir, nextDir, food, obs, score, best, dead, paused, started, tick, acc, last, comboN, eats;
+  best = 0;
+
+  function reset(){
+    snake = [{x:8,y:12},{x:7,y:12},{x:6,y:12}];
+    dir = {x:1,y:0}; nextDir = dir; obs = []; score = 0; comboN = 0; eats = 0;
+    dead = false; paused = false; started = false; acc = 0; last = performance.now();
+    tick = 130; placeFood(); upd();
+    ov.style.display = 'flex';
+    ovsub.textContent = 'PRESS ANY ARROW TO BEGIN';
+  }
+  function upd(){ scoreEl.textContent = score; bestEl.textContent = best; speedEl.textContent = 'x' + (130/tick).toFixed(1); }
+
+  function free(){
+    var taken = {};
+    snake.forEach(function(s){ taken[s.x + ',' + s.y] = 1; });
+    obs.forEach(function(o){ taken[o.x + ',' + o.y] = 1; });
+    taken[food ? food.x + ',' + food.y : '-1,-1'] = 1;
+    var p;
+    do { p = { x: (Math.random()*COLS)|0, y: (Math.random()*ROWS)|0 }; } while (taken[p.x+','+p.y]);
+    return p;
+  }
+  function placeFood(){ food = free(); }
+
+  function popText(txt, x, y){
+    var d = document.createElement('div');
+    d.className = 'combo'; d.textContent = txt;
+    d.style.left = (x / cv.width * 100) + '%';
+    d.style.top = (y / cv.height * 100) + '%';
+    document.getElementById('stage').appendChild(d);
+    setTimeout(function(){ d.remove(); }, 900);
+  }
+
+  function die(){
+    dead = true;
+    if (score > best) { best = score; }
+    ov.style.display = 'flex';
+    ovsub.innerHTML = 'SIGNAL LOST &mdash; SCORE ' + score + '<br>PRESS ANY ARROW TO REBOOT';
+    upd();
+  }
+
+  function step(){
+    if (!started || dead || paused) return;
+    dir = nextDir;
+    var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    if (head.x < 0 || head.y < 0 || head.x >= COLS || head.y >= ROWS) return die();
+    for (var i = 0; i < snake.length; i++) if (snake[i].x===head.x && snake[i].y===head.y) return die();
+    for (var j = 0; j < obs.length; j++) if (obs[j].x===head.x && obs[j].y===head.y) return die();
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y){
+      score += 10 + comboN * 2; comboN++; eats++;
+      placeFood();
+      if (eats % 4 === 0 && obs.length < 26){ obs.push(free()); popText('+OBSTACLE', Math.random()*70+15, 40); }
+      if (tick > 62) tick -= 2.5;
+      upd();
+    } else {
+      snake.pop();
+      comboN = Math.max(0, comboN - 1);
+      if (comboN > 3 && Math.random() < .3) popText('COMBO x' + comboN, Math.random()*60+20, Math.random()*40+30);
+    }
+  }
+
+  var beat = 0;
+  function draw(now){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    var g = ctx.createLinearGradient(0,0,cv.width,cv.height);
+    g.addColorStop(0,'#12081f'); g.addColorStop(1,'#0a0714');
+    ctx.fillStyle = g; ctx.fillRect(0,0,cv.width,cv.height);
+
+    ctx.strokeStyle = 'rgba(217,70,239,.07)'; ctx.lineWidth = 1;
+    var pulse = .07 + .04 * Math.abs(Math.sin(now/300));
+    ctx.beginPath();
+    for (var cx = 0; cx <= COLS; cx++){ ctx.moveTo(cx*CW,0); ctx.lineTo(cx*CW,cv.height); }
+    for (var cy = 0; cy <= ROWS; cy++){ ctx.moveTo(0,cy*CH); ctx.lineTo(cv.width,cy*CH); }
+    ctx.stroke();
+
+    beat = Math.sin(now/300);
+    ctx.save();
+    ctx.shadowColor = '#f0abfc'; ctx.shadowBlur = 14 + 6*beat;
+    for (var oi = 0; oi < obs.length; oi++){
+      ctx.fillStyle = '#86198f';
+      roundRect(obs[oi].x*CW+3, obs[oi].y*CH+3, CW-6, CH-6, 4); ctx.fill();
+      ctx.strokeStyle = '#e879f9'; ctx.lineWidth = 1.5;
+      roundRect(obs[oi].x*CW+3, obs[oi].y*CH+3, CW-6, CH-6, 4); ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = '#fde68a'; ctx.shadowBlur = 18 + 10*Math.abs(beat);
+    ctx.fillStyle = '#fde047';
+    ctx.beginPath(); ctx.arc(food.x*CW+CW/2, food.y*CH+CH/2, CW*.3, 0, 7); ctx.fill();
+    ctx.restore();
+
+    for (var si = snake.length-1; si >= 0; si--){
+      var t = si/snake.length, hue = 190 + t*80;
+      ctx.save();
+      ctx.shadowColor = si===0 ? '#67e8f9' : 'hsl(' + hue + ',95%,65%)';
+      ctx.shadowBlur = si===0 ? 22 : 12;
+      ctx.fillStyle = si===0 ? '#cffafe' : 'hsl(' + hue + ',90%,' + (58 - t*14) + '%)';
+      var pad = si===0 ? 1.5 : 3;
+      roundRect(snake[si].x*CW+pad, snake[si].y*CH+pad, CW-pad*2, CH-pad*2, 5); ctx.fill();
+      ctx.restore();
+    }
+
+    if (paused && !dead){
+      ctx.fillStyle = 'rgba(10,7,20,.7)'; ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.fillStyle = '#f0abfc'; ctx.font = '800 34px ui-monospace,monospace';
+      ctx.textAlign = 'center'; ctx.fillText('PAUSED', cv.width/2, cv.height/2);
+    }
+    requestAnimationFrame(draw);
+  }
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function setDir(nx,ny){
+    if (dead){ reset(); return; }
+    if (!started){ started = true; ov.style.display = 'none'; }
+    if (dir.x === -nextDir.x && dir.y === -nextDir.y) return;
+    nextDir = { x:nx, y:ny };
+  }
+  window.addEventListener('keydown', function(e){
+    var k = e.key.toLowerCase();
+    if (k==='arrowleft'||k==='a') setDir(-1,0);
+    else if (k==='arrowright'||k==='d') setDir(1,0);
+    else if (k==='arrowup'||k==='w') setDir(0,-1);
+    else if (k==='arrowdown'||k==='s') setDir(0,1);
+    else if (k===' ') { e.preventDefault(); if(started&&!dead) paused=!paused; }
+    else if (!started && !dead){ setDir(1,0); }
+  });
+  var tx=0, ty=0;
+  document.addEventListener('touchstart', function(e){ tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX-tx, dy = e.changedTouches[0].clientY-ty;
+    if (Math.abs(dx)<18 && Math.abs(dy)<18){ if(!started||dead) setDir(1,0); return; }
+    if (Math.abs(dx)>Math.abs(dy)) setDir(dx>0?1:-1,0); else setDir(0,dy>0?1:-1);
+  }, {passive:true});
+  ov.addEventListener('click', function(){ if(dead) reset(); else setDir(1,0); });
+  var fhint = document.getElementById('fhint');
+  function killHint(){ fhint.classList.add('gone'); }
+  document.addEventListener('pointerdown', killHint, {once:true});
+  window.addEventListener('keydown', killHint, {once:true});
+  document.addEventListener('touchstart', killHint, {once:true});
+
+  reset();
+  last = performance.now();
+  function loop(now){
+    var dt = Math.min(now - last, 100);
+    last = now;
+    if (started && !dead && !paused){
+      acc += dt;
+      while (acc >= tick){ acc -= tick; step(); }
+    } else {
+      acc = 0;
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+name: agent-analyst
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: agent-analyst
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Weekly funnel + catalog report
+        run: node scripts/agents/analyst.mjs
+
+      - name: Commit report
+        run: |
+          if [ -n "$(git status --porcelain content/reports/)" ]; then
+            git config user.name "forge-analyst-agent"
+            git config user.email "agents@forge.example"
+            git add content/reports/
+            git commit -m "agent(analyst): weekly report"
+            git push
+          else
+            echo "report unchanged"
+          fi

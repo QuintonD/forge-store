@@ -1,0 +1,132 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "tailwindcss";
+
+@theme {
+  /* Generative Canvas — base palette */
+  --color-canvas: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-ink: #141414;
+  --color-ink-secondary: #555a60;
+  --color-ink-subtle: #7a7e82;
+  --color-line: #c7c7c2;
+  --color-line-soft: #e3e2dd;
+  --color-night: #081522;
+
+  /* Category accents — one per category, used sparingly */
+  --color-accent-blue: #315cff;
+  --color-accent-navy: #1d3557;
+  --color-accent-purple: #7a5cfa;
+  --color-accent-green: #2e7d6b;
+  --color-accent-slate: #5b6472;
+  --color-accent-orange: #f97316;
+
+  --font-sans: "Geist Variable", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-rise: rise 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop: pop 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-toast-in: toastIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-sync-pulse: syncPulse 1.4s ease-in-out infinite;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes syncPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  @keyframes drawLine {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+}
+
+html {
+  scroll-padding-top: 104px;
+}
+
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+}
+
+::selection {
+  background: rgba(49, 92, 255, 0.16);
+}
+
+:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c7c7c2;
+  border-radius: 8px;
+  border: 2px solid #f7f6f2;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a9aaa4;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Card hover: border darkens slightly, optional -1px lift. No large motion. */
+.card-hover {
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s;
+}
+.card-hover:hover {
+  transform: translateY(-1px);
+}
+
+/* Meaningful line-draw reveal for structural dividers */
+.draw-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: drawLine 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+}
+
+.skeleton {
+  background: linear-gradient(100deg, #eceae4 40%, #f4f3ee 50%, #eceae4 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

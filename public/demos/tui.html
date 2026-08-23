@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; overflow:hidden; background:#020806;
+    font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; }
+  body { display:flex; align-items:center; justify-content:center; padding:14px; color:#9ae6b4; }
+  .term { width:min(96vw,880px); height:min(92vh,560px); display:flex; flex-direction:column;
+    border:1px solid #14532d; border-radius:12px; overflow:hidden;
+    background:linear-gradient(180deg,#04120a,#030d07); box-shadow:0 24px 70px -18px rgba(16,185,129,.22), 0 0 90px rgba(16,185,129,.05);
+    position:relative; user-select:none; -webkit-user-select:none; }
+  .titlebar { display:flex; align-items:center; gap:7px; padding:9px 13px; border-bottom:1px solid #123a22; background:rgba(6,26,15,.7); }
+  .tl { width:11px; height:11px; border-radius:50%; } .r{background:#f87171}.y{background:#fbbf24}.g{background:#34d399}
+  .tname { margin-left:10px; font-size:11.5px; letter-spacing:.08em; color:#4ade80; opacity:.85; }
+  .crumb { flex:1; text-align:center; font-size:11.5px; color:#65d48e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .crumb span { color:#2f6b45; }
+  .main { flex:1; display:flex; min-height:0; }
+  .pane { flex:1; min-width:0; overflow-y:auto; padding:10px 0; scrollbar-width:none; }
+  .pane::-webkit-scrollbar{display:none}
+  .list { border-right:1px solid #123a22; flex:1.15; }
+  .preview { flex:1.25; padding-top:12px; }
+  .ph { padding:0 14px 7px; font-size:10px; letter-spacing:.28em; color:#2f6b45; border-bottom:1px dashed #123a22; margin-bottom:6px; position:sticky; top:-10px; background:#04120a; }
+  .row { padding:3px 14px; font-size:13px; line-height:1.75; white-space:pre; cursor:pointer; display:flex; justify-content:space-between; gap:12px; }
+  .row.sel { background:linear-gradient(90deg,rgba(52,211,153,.16),rgba(52,211,153,.03)); box-shadow:inset 3px 0 0 #34d399; }
+  .dir::before { content:"\25B8  "; color:#34d399; } .file::before { content:"   "; }
+  .sz { color:#2f6b45; font-size:11px; }
+  pre { font-size:12px; line-height:1.62; padding:10px 16px; white-space:pre-wrap; word-break:break-word; color:#86efac; }
+  .empty { color:#2f6b45; text-align:center; padding-top:40px; font-size:12px; letter-spacing:.14em; }
+  .statusbar { display:flex; gap:14px; padding:8px 14px; font-size:11px; color:#2f6b45; border-top:1px solid #123a22; background:rgba(6,26,15,.7); flex-wrap:wrap; }
+  kbd { border:1px solid #1c5c35; border-radius:4px; padding:0 5px; font-size:10px; color:#6ee7b7; background:rgba(52,211,153,.07); }
+  .filterbar { position:absolute; left:0; right:0; bottom:0; display:flex; align-items:center; gap:8px;
+    padding:9px 14px; background:#062112; border-top:1px solid #1c5c35; transform:translateY(110%); transition:transform .18s ease; z-index:5; }
+  .filterbar.show { transform:none; }
+  .filterbar .pfx { color:#34d399; font-weight:700; }
+  #q { flex:1; background:transparent; border:none; outline:none; color:#d1fae5; font:inherit; caret-color:#34d399; }
+  .scanlines { pointer-events:none; position:absolute; inset:0; background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px); mix-blend-mode:multiply; border-radius:12px; }
+  .fhint { position:absolute; right:14px; top:46px; font-size:10.5px; letter-spacing:.12em; color:#86efac;
+    background:rgba(6,33,18,.9); border:1px solid #1c5c35; border-radius:999px; padding:5px 13px;
+    transition:opacity .6s; z-index:6; }
+  .fhint.gone { opacity:0; }
+</style>
+</head>
+<body>
+<div class="term" id="term">
+  <div class="titlebar">
+    <span class="tl r"></span><span class="tl y"></span><span class="tl g"></span>
+    <div class="crumb" id="crumb"></div>
+    <div class="tname">warpfile 3.2.0</div>
+  </div>
+  <div class="main">
+    <div class="pane list"><div class="ph">FILES</div><div id="list"></div></div>
+    <div class="pane preview"><div class="ph" id="pvh">PREVIEW</div><div id="pv"><div class="empty">SELECT A FILE</div></div></div>
+  </div>
+  <div class="statusbar">
+    <span><kbd>j</kbd>/<kbd>k</kbd> move</span><span><kbd>l</kbd>/<kbd>&crarr;</kbd> open</span>
+    <span><kbd>h</kbd> up</span><span><kbd>/</kbd> filter</span><span><kbd>g</kbd><kbd>G</kbd> ends</span>
+    <span style="margin-left:auto" id="meta"></span>
+  </div>
+  <div class="filterbar" id="fbar"><span class="pfx">/</span><input id="q" placeholder="fuzzy filter&hellip;" autocomplete="off"></div>
+  <div class="fhint" id="fhint">CLICK HERE ONCE &middot; THEN j / k TO MOVE, l TO OPEN</div>
+  <div class="scanlines"></div>
+</div>
+<script>
+(function(){
+  function F(content){ return { dir:false, size:(content.length/1024), content:content }; }
+  function D(kids){ return { dir:true, kids:kids, size:0 }; }
+
+  var FS = D({
+    'src': D({
+      'main.rs': F('use warpfile::prelude::*;
+
+fn main() {
+    let app = App::builder()
+        .panes(Panes::Dual)
+        .keymap(Keymap::Warpfile)
+        .index(Index::fuzzy_recursive("~"))
+        .build()
+        .expect("terminal too old");
+
+    app.run_event_loop();
+}
+'),
+      'panes.rs': F('// dual pane renderer, zero flicker
+function render(frame) {
+    // diff against previous buffer,
+    // emit only changed cells
+    for (cell of frame.dirty())
+        term.write_at(cell.x, cell.y, cell.ch);
+}
+'),
+      'fuzzy.rs': F('//! three keystrokes to any file
+pub fn jump(query: &str) -> Option<&Path> {
+    INDEX.best_match(query).or_else(|| {
+        INDEX.fallback(query)
+    })
+}
+')
+    }),
+    'docs': D({
+      'readme.md': F('# Warpfile
+
+A file manager that thinks in keystrokes.
+
+## Why
+- fuzzy jump, fuzzy filter, fuzzy everything
+- native-refresh flicker-free rendering
+- remotes feel local over plain SSH
+
+## Keys
+    j/k move   l open   h up
+    / filter   g/G ends
+'),
+      'changelog.txt': F('3.2.0  archive mount previews; j/k half-page scroll
+3.1.4  fix flicker on tmux resize
+3.1.0  sshfs passthrough; bulk rename scratchpad
+3.0.0  new fuzzy engine (nucleo), 4x faster
+')
+    }),
+    'assets': D({
+      'icon.svg': F('<svg viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="8"
+        fill="#10b981"/>
+  <path d="M9 17l5 5 9-12"
+        stroke="#04120a" stroke-width="3"
+        fill="none" stroke-linecap="round"/>
+</svg>
+'),
+      'screenshot.png': F('(binary preview suppressed, 84.1 KB)
+[####################....] 82%
+real builds render ANSI block art here.')
+    }),
+    'Cargo.toml': F('[package]
+name = "warpfile"
+version = "3.2.0"
+edition = "2021"
+
+[dependencies]
+ratatui   = "0.26"
+crossterm = "0.27"
+nucleo    = "0.5"
+notify    = "6"
+
+[profile.release]
+lto = true
+strip = true
+'),
+    'todo.txt': F('[x] half-page j/k scrolling
+[x] archive mount previews
+[ ] marks + quickfix list
+[ ] ssh connection pooling
+[ ] image protocol previews (kitty/sixel)'),
+    'metrics.log': F('09:14:02 index rebuild 412ms (18,204 files)
+09:14:02 watcher armed (inotify) ok
+09:31:55 pane render 0.8ms avg
+11:02:10 fuzzy "deplo" -> 3 hits in 0.3ms
+13:44:51 bulk rename 214 files via regex
+')
+  });
+
+  var path=['~'], cwd=FS, sel=0, filtering=false, query='';
+  var listEl=document.getElementById('list'), pvEl=document.getElementById('pv'),
+      pvh=document.getElementById('pvh'), crumb=document.getElementById('crumb'),
+      meta=document.getElementById('meta'), fbar=document.getElementById('fbar'),
+      q=document.getElementById('q');
+
+  function entries(){
+    var out=[];
+    Object.keys(cwd.kids).forEach(function(name){
+      if(query && name.toLowerCase().indexOf(query.toLowerCase())===-1) return;
+      out.push({ name:name, node:cwd.kids[name] });
+    });
+    out.sort(function(a,b){
+      if(a.node.dir!==b.node.dir) return a.node.dir?-1:1;
+      return a.name<b.name?-1:1;
+    });
+    return out;
+  }
+
+  function fmtSize(n){
+    if(n<1) return Math.round(n*1024)+' B';
+    return n.toFixed(1)+' KB';
+  }
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function render(){
+    var es=entries();
+    if(sel>=es.length) sel=Math.max(0,es.length-1);
+    listEl.innerHTML='';
+    es.forEach(function(e,i){
+      var row=document.createElement('div');
+      row.className='row '+(e.node.dir?'dir':'file')+(i===sel?' sel':'');
+      var nm=document.createElement('span'); nm.textContent=e.name;
+      var sz=document.createElement('span'); sz.className='sz';
+      sz.textContent=e.node.dir?(Object.keys(e.node.kids).length+' items'):fmtSize(e.node.size);
+      row.appendChild(nm); row.appendChild(sz);
+      row.onclick=function(){ sel=i; render(); };
+      row.ondblclick=function(){ sel=i; open(); };
+      listEl.appendChild(row);
+    });
+    var seg=path.map(function(p,i){ return i===0?p:'<span style="color:#2f6b45"> / </span>'+p; }).join('');
+    crumb.innerHTML='<span style="color:#2f6b45">warpfile</span>&nbsp; '+seg;
+    meta.textContent=es.length+' items'+(query?' Â· "'+query+'"':'');
+    var cur=es[sel];
+    if(!cur){ pvh.textContent='PREVIEW'; pvEl.innerHTML='<div class="empty">NO MATCHES</div>'; return; }
+    if(cur.node.dir){
+      pvh.textContent='DIRECTORY';
+      var names=Object.keys(cur.node.kids);
+      pvEl.innerHTML='<pre>'+names.slice(0,40).map(function(n){
+        return '  '+n+(cur.node.kids[n].dir?'/':'');
+      }).join('
+')+(names.length>40?'
+  ... +'+(names.length-40)+' more':'')+'</pre>';
+    } else {
+      pvh.textContent=cur.name.toUpperCase()+' · '+fmtSize(cur.node.size);
+      pvEl.innerHTML='<pre>'+escapeHtml(cur.node.content)+'</pre>';
+      pvEl.scrollTop=0;
+    }
+    var selRow=listEl.children[sel];
+    if(selRow&&selRow.scrollIntoView) selRow.scrollIntoView({block:'nearest'});
+  }
+
+  function open(){
+    var es=entries(), cur=es[sel];
+    if(!cur) return;
+    if(cur.node.dir){ cwd=cur.node; path.push(cur.name); sel=0; query=''; q.value=''; render(); }
+  }
+  function up(){
+    if(path.length>1){
+      path.pop(); cwd=FS;
+      for(var i=1;i<path.length;i++) cwd=cwd.kids[path[i]];
+      sel=0; query=''; q.value=''; render();
+    }
+  }
+
+  document.addEventListener('keydown',function(e){
+    var es=entries();
+    if(filtering){
+      if(e.key==='Enter'){ e.preventDefault(); filtering=false; fbar.classList.remove('show'); q.blur(); sel=0; render(); }
+      else if(e.key==='Escape'){ e.preventDefault(); filtering=false; query=''; q.value=''; fbar.classList.remove('show'); q.blur(); render(); }
+      return;
+    }
+    switch(e.key){
+      case 'j': case 'ArrowDown': e.preventDefault(); if(es.length){ sel=(sel+1)%es.length; render(); } break;
+      case 'k': case 'ArrowUp': e.preventDefault(); if(es.length){ sel=(sel-1+es.length)%es.length; render(); } break;
+      case 'g': sel=0; render(); break;
+      case 'G': sel=Math.max(0,es.length-1); render(); break;
+      case 'l': case 'Enter': e.preventDefault(); open(); break;
+      case 'h': case 'Backspace': e.preventDefault(); up(); break;
+      case '/':
+        e.preventDefault(); filtering=true; fbar.classList.add('show');
+        setTimeout(function(){ q.focus(); },30);
+        break;
+    }
+  });
+  q.addEventListener('input',function(){ query=q.value.trim(); sel=0; render(); });
+  var fhint=document.getElementById('fhint');
+  function killHint(){ fhint.classList.add('gone'); }
+  document.addEventListener('pointerdown',killHint,{once:true});
+  window.addEventListener('keydown',killHint,{once:true});
+  window.addEventListener('resize',render);
+  render();
+})();
+</script>
+</body>
+</html>

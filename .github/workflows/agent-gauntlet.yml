@@ -1,0 +1,63 @@
+name: agent-gauntlet
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/data.ts'
+      - 'src/lib/demos.ts'
+      - 'scripts/demo-sources.mjs'
+      - 'public/demos/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: agent-gauntlet-${{ github.ref }}
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Regenerate artifacts + attestation
+        run: |
+          node scripts/gen-demos.mjs
+          node scripts/attest.mjs
+          node scripts/verify.mjs
+
+      - name: Validation agent
+        run: npm run validate
+
+      - name: Post evidence bundle
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const manifest = JSON.parse(
+              fs.readFileSync('public/.well-known/forge-attestation.json', 'utf8'),
+            )
+            const files = (manifest.artifacts ?? []).length || Object.keys(manifest).length
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                '**Gauntlet stages 1–3 evidence bundle** (automated)',
+                '',
+                `- ✅ Artifact regeneration: byte-stable`,
+                `- ✅ ed25519 attestation signed (${files} artifacts hashed)`,
+                '- ✅ `npm run verify` passed',
+                '- ✅ Validation agent green',
+                '',
+                '_Human reviewer signature still required before merge — stages 4–5._',
+              ].join('\n'),
+            })

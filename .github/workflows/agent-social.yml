@@ -1,0 +1,47 @@
+name: agent-social
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: agent-social
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Draft social + newsletter content from catalog
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          node scripts/agents/social.mjs
+          node scripts/agents/newsletter.mjs
+          node scripts/agents/ledger-lint.mjs
+
+      - name: Commit drafts to approval queue
+        run: |
+          if [ -n "$(git status --porcelain content/)" ]; then
+            git config user.name "forge-content-agent"
+            git config user.email "agents@forge.example"
+            git add content/
+            git commit -m "agent(content): new drafts in approval queue"
+            git push
+          else
+            echo "queue unchanged"
+          fi

@@ -1,0 +1,38 @@
+{
+  "algorithm": "ed25519",
+  "keyFingerprint": "sha256:ebcb2dc9845ef40552467b9cb654a900b86a0698547476dcf6f83515a2814862",
+  "signedAt": "2026-08-23T15:17:50.360Z",
+  "manifest": [
+    {
+      "id": "dashboard",
+      "bytes": 13715,
+      "sha256": "4c43f9a2d92834a209d546ca9b857bbeef80de3192be15f9ab0accb6561a3e2c"
+    },
+    {
+      "id": "evaldeck",
+      "bytes": 12180,
+      "sha256": "3fba3b22504a448f9ff269d646ea0dca893bcfa03693895a4c058e237e4d633d"
+    },
+    {
+      "id": "g2048",
+      "bytes": 10241,
+      "sha256": "0da0bdb246c230a17e7485425637626fc615007f59f5986ded4fe75fcb87397b"
+    },
+    {
+      "id": "kanban",
+      "bytes": 10816,
+      "sha256": "3dbf20dd4281202f8a6bc9180d1a0880e397f6aee78e031740c3b45d776dade5"
+    },
+    {
+      "id": "snake",
+      "bytes": 10118,
+      "sha256": "59aac9e44e4ffd76edf71111b73045bce551b86e82d4b054fae3da0789dd0c97"
+    },
+    {
+      "id": "tui",
+      "bytes": 11523,
+      "sha256": "e9c2bec0b72c272f8a82ae8df635f69dcbe279f996d137b55e545644b3f81e70"
+    }
+  ],
+  "signature": "theWjBtDDnp4QqnPzpgdHM5KMI5OJ+aEqxYkF92PchCVOKWYdV6FFL9KP1ImojlnNHJUyBekfOb1Z3VNlD7NAw=="
+}

@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    name: Validate + build + budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies (lockfile-strict)
+        run: npm ci
+
+      - name: Validation agent (content, demos, routes, a11y cues, security surface)
+        run: npm run validate
+
+      - name: Claims-discipline lint (marketing copy vs content spec)
+        run: node scripts/agents/ledger-lint.mjs
+
+      - name: Typecheck + build
+        run: npm run build
+
+      - name: Post-build budget gate (bundle size)
+        run: npm run postbuild
+
+      - name: Dependency audit (advisory — reported, not blocking)
+        continue-on-error: true
+        run: npm audit --audit-level=high
+
+      - name: Upload production artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-dist
+          path: dist/
+          retention-days: 14

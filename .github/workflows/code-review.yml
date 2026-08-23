@@ -1,0 +1,55 @@
+name: Adversarial code review
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  llm-review:
+    name: LLM adversarial reviewer (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect diff
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD > /tmp/pr.diff
+          wc -l /tmp/pr.diff
+
+      - name: Run adversarial review
+        env:
+          REVIEW_API_KEY: ${{ secrets.REVIEW_API_KEY }}
+          MODEL_ENDPOINT: ${{ vars.MODEL_ENDPOINT }}
+        run: |
+          PROMPT='You are a hostile senior reviewer. Audit this diff for: (1) correctness bugs,
+          (2) security issues incl. XSS, injection, sandbox escapes, secret leakage,
+          (3) accessibility regressions, (4) UX/visual-cue regressions,
+          (5) performance foot-guns. Output findings as a markdown table with columns
+          Severity | File:Line | Finding | Why it matters | Suggested fix.
+          Rank by severity. If nothing found, say "No findings". Diff follows.'
+          jq -n --arg p "$PROMPT" --rawfile d /tmp/pr.diff '{model:"reviewer-v1",prompt:$p,diff:$d}' > /tmp/body.json
+          curl -sS --fail-with-body -X POST "$MODEL_ENDPOINT" \
+            -H "Authorization: Bearer $REVIEW_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @/tmp/body.json -o /tmp/review.md || {
+              echo "Reviewer endpoint unavailable — skipping (advisory job)."; exit 0; }
+
+      - name: Post findings to PR
+        if: hashFiles('/tmp/review.md') != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const body = fs.readFileSync('/tmp/review.md', 'utf8').slice(0, 60000)
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🛡 Adversarial review\n\n${body}\n\n_Advisory — humans decide what blocks._`
+            })
