@@ -1,267 +1,267 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://forge.example/</loc>
+    <loc>https://quintond.github.io/forge-store/</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://forge.example/charts</loc>
+    <loc>https://quintond.github.io/forge-store/charts</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://forge.example/search</loc>
+    <loc>https://quintond.github.io/forge-store/search</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://forge.example/library</loc>
+    <loc>https://quintond.github.io/forge-store/library</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://forge.example/sync</loc>
+    <loc>https://quintond.github.io/forge-store/sync</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://forge.example/submit</loc>
+    <loc>https://quintond.github.io/forge-store/submit</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://forge.example/trust</loc>
+    <loc>https://quintond.github.io/forge-store/trust</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://forge.example/category/UIs%20%26%20Components</loc>
+    <loc>https://quintond.github.io/forge-store/category/UIs%20%26%20Components</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://forge.example/category/Dashboards</loc>
+    <loc>https://quintond.github.io/forge-store/category/Dashboards</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://forge.example/category/Games</loc>
+    <loc>https://quintond.github.io/forge-store/category/Games</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://forge.example/category/TUIs%20%26%20CLIs</loc>
+    <loc>https://quintond.github.io/forge-store/category/TUIs%20%26%20CLIs</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://forge.example/category/Harnesses%20%26%20Evals</loc>
+    <loc>https://quintond.github.io/forge-store/category/Harnesses%20%26%20Evals</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://forge.example/category/Agents%20%26%20Automation</loc>
+    <loc>https://quintond.github.io/forge-store/category/Agents%20%26%20Automation</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://forge.example/collection/Weekend%20MVP%20Kit</loc>
+    <loc>https://quintond.github.io/forge-store/collection/Weekend%20MVP%20Kit</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/collection/Terminal%20Power%20Hour</loc>
+    <loc>https://quintond.github.io/forge-store/collection/Terminal%20Power%20Hour</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/collection/Eval%20Before%20You%20Ship</loc>
+    <loc>https://quintond.github.io/forge-store/collection/Eval%20Before%20You%20Ship</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/collection/Cozy%20Corner</loc>
+    <loc>https://quintond.github.io/forge-store/collection/Cozy%20Corner</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/neon-serpent</loc>
+    <loc>https://quintond.github.io/forge-store/app/neon-serpent</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/slide-2048</loc>
+    <loc>https://quintond.github.io/forge-store/app/slide-2048</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/pulse-analytics</loc>
+    <loc>https://quintond.github.io/forge-store/app/pulse-analytics</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/pixel-pet-hotel</loc>
+    <loc>https://quintond.github.io/forge-store/app/pixel-pet-hotel</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/glasskit</loc>
+    <loc>https://quintond.github.io/forge-store/app/glasskit</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/ledgerly</loc>
+    <loc>https://quintond.github.io/forge-store/app/ledgerly</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/inbox-zeroer</loc>
+    <loc>https://quintond.github.io/forge-store/app/inbox-zeroer</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/market-mosaic</loc>
+    <loc>https://quintond.github.io/forge-store/app/market-mosaic</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/warpfile</loc>
+    <loc>https://quintond.github.io/forge-store/app/warpfile</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/opsdeck</loc>
+    <loc>https://quintond.github.io/forge-store/app/opsdeck</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/kanbanly</loc>
+    <loc>https://quintond.github.io/forge-store/app/kanbanly</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/gitsage</loc>
+    <loc>https://quintond.github.io/forge-store/app/gitsage</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/meeting-minion</loc>
+    <loc>https://quintond.github.io/forge-store/app/meeting-minion</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/starfall-tactics</loc>
+    <loc>https://quintond.github.io/forge-store/app/starfall-tactics</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/formflow-studio</loc>
+    <loc>https://quintond.github.io/forge-store/app/formflow-studio</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/syspulse-tui</loc>
+    <loc>https://quintond.github.io/forge-store/app/syspulse-tui</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/habit-graph</loc>
+    <loc>https://quintond.github.io/forge-store/app/habit-graph</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/evaldeck</loc>
+    <loc>https://quintond.github.io/forge-store/app/evaldeck</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/rhythm-rift</loc>
+    <loc>https://quintond.github.io/forge-store/app/rhythm-rift</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/dungeon-of-prompts</loc>
+    <loc>https://quintond.github.io/forge-store/app/dungeon-of-prompts</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/aurora-tokens</loc>
+    <loc>https://quintond.github.io/forge-store/app/aurora-tokens</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/scraperbot-studio</loc>
+    <loc>https://quintond.github.io/forge-store/app/scraperbot-studio</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/orbit-golf</loc>
+    <loc>https://quintond.github.io/forge-store/app/orbit-golf</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/notesmith</loc>
+    <loc>https://quintond.github.io/forge-store/app/notesmith</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/tracelens</loc>
+    <loc>https://quintond.github.io/forge-store/app/tracelens</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/onboardly</loc>
+    <loc>https://quintond.github.io/forge-store/app/onboardly</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/wordforge-daily</loc>
+    <loc>https://quintond.github.io/forge-store/app/wordforge-daily</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/motion-menu</loc>
+    <loc>https://quintond.github.io/forge-store/app/motion-menu</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/bandwidth-bandit</loc>
+    <loc>https://quintond.github.io/forge-store/app/bandwidth-bandit</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/carbon-lens</loc>
+    <loc>https://quintond.github.io/forge-store/app/carbon-lens</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/cronwright</loc>
+    <loc>https://quintond.github.io/forge-store/app/cronwright</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/cardstack-ui</loc>
+    <loc>https://quintond.github.io/forge-store/app/cardstack-ui</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/redteam-range</loc>
+    <loc>https://quintond.github.io/forge-store/app/redteam-range</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/crew-roster</loc>
+    <loc>https://quintond.github.io/forge-store/app/crew-roster</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/benchlite</loc>
+    <loc>https://quintond.github.io/forge-store/app/benchlite</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://forge.example/app/shellcast</loc>
+    <loc>https://quintond.github.io/forge-store/app/shellcast</loc>
     <lastmod>2026-08-23</lastmod>
     <priority>0.7</priority>
   </url>
