@@ -28,10 +28,15 @@ jobs:
 
       - name: Check sitemap drift (catalog vs committed)
         id: check
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
         run: node scripts/agents/seo-audit.mjs --check
 
       - name: Regenerate + open drift PR
         if: failure()
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node scripts/agents/seo-audit.mjs
           git config user.name "forge-seo-agent"
@@ -44,5 +49,3 @@ jobs:
             --title "agent(seo): sitemap drift" \
             --body "Nightly SEO audit found catalog/sitemap drift. Regenerated artifact attached. Merge to publish." \
             --label "agent,seo"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
