@@ -41,5 +41,9 @@ const body = [
 ]
 
 const target = join(outDir, `${stamp()}-social.md`)
+if (existsSync(target) && readFileSync(target, 'utf8').includes('APPROVED-READY')) {
+  console.log(`skipped ${target} — approved draft is immutable to agents`)
+  process.exit(0)
+}
 writeFileSync(target, body.join('\n'))
 console.log(`wrote ${target} (${featured.length} posts)`)

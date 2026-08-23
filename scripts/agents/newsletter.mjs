@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { editorsPicks, topDownloads, freshest, COLLECTIONS, getApp, stamp, isoWeek, catalogStats } from './lib/catalog.mjs'
@@ -49,5 +49,9 @@ const body = [
 ]
 
 const target = join(outDir, `newsletter-${year}-W${String(week).padStart(2, '0')}.md`)
+if (existsSync(target) && readFileSync(target, 'utf8').includes('APPROVED-READY')) {
+  console.log(`skipped ${target} — approved draft is immutable to agents`)
+  process.exit(0)
+}
 writeFileSync(target, body.join('\n'))
 console.log(`wrote ${target}`)
