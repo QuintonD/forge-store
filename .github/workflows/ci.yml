@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies (lockfile-strict)
         run: npm ci
 
+      - name: Regenerate artifacts + attestation (self-consistent demo keypair)
+        run: npm run attest
+
       - name: Validation agent (content, demos, routes, a11y cues, security surface)
         run: npm run validate
 
