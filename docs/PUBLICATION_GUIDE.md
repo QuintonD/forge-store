@@ -4,6 +4,24 @@ Companion to [LAUNCH_RUNBOOK](LAUNCH_RUNBOOK.md). This is the operational walkth
 each step lists what it does, who executes it (agent vs human), and how to verify.
 Steps are ordered so each one unblocks the next.
 
+## Execution status (updated after autonomous run)
+
+| Step | Executor | Result |
+|---|---|---|
+| 0 · Repo hygiene & push | Agent | ✅ `QuintonD/forge-store` live on GitHub |
+| 1A · GitHub Pages deploy | Agent | ✅ **https://quintond.github.io/forge-store/** — deep links verified in browser |
+| 1B/1C · Vercel / Netlify upgrade | Human | ⏸ blocked at login wall (no session) — import repo when ready |
+| 2 · SITE_URL + sitemap | Agent | ✅ variable set, sitemap regenerated (53 real URLs), seo-nightly green |
+| 3 · Content batch | Agent-prepared | ✅ drafts regenerated against live origin, marked APPROVED-READY |
+| 4 · Model key | Human | ⏸ optional; agents run deterministic without it |
+| 5 · Launch post | Human only | ⏸ copy ready in `content/launch/LAUNCH_COPY.md`; HN blocks automation |
+
+Incidents hit & fixed during the run (all root-caused): missing `@types/node`,
+CI verify-before-attest ordering (keys are generated per-run, never committed),
+GH Pages needed enabling via API (`build_type=workflow`), repository variables not
+auto-exported as env vars (`vars.SITE_URL` passthrough added), and agent-vs-approval
+write races (approved drafts are now immutable to agents).
+
 ---
 
 ## Step 0 — Repo hygiene & version control  `agent · autonomous`
