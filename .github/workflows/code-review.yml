@@ -42,7 +42,7 @@ jobs:
 
       - name: Post findings to PR
         if: hashFiles('/tmp/review.md') != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs')
